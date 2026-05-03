@@ -294,3 +294,58 @@ code {
     border-right-color: var(--border);
   }
 }
+
+/* --- ParkWise design variables & utility classes (from design.html) --- */
+:root{
+  --color-background-secondary:#F5F7FA;
+  --color-background-primary:#FFFFFF;
+  --color-border-tertiary:#E6EDF5;
+  --color-border-secondary:#D9E6F4;
+  --color-text-primary:#0C447C;
+  --color-text-secondary:#6B7280;
+  --color-text-tertiary:#9CA3AF;
+  --border-radius-md:8px;
+  --border-radius-lg:12px;
+}
+
+*{box-sizing:border-box}
+.P{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:10px}
+.A{background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);overflow:hidden;min-height:520px}
+.N{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.NL{display:flex;align-items:center;gap:6px}
+.NI{width:26px;height:26px;border-radius:var(--border-radius-md);background:#378ADD;display:flex;align-items:center;justify-content:center;color:white;font-weight:500;font-size:11px}
+.NT{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.NR{display:flex;align-items:center;gap:10px;font-size:12px}
+.NB{color:var(--color-text-secondary);cursor:pointer;padding:4px 8px;border-radius:var(--border-radius-md)}
+.NB:hover{background:var(--color-background-secondary)}
+.NA{color:#0C447C;font-weight:500;background:#E6F1FB;border-radius:var(--border-radius-md);padding:4px 8px}
+.AV{width:28px;height:28px;border-radius:50%;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--color-text-secondary)}
+.PG{display:none;padding:14px}
+.PG.on{display:block}
+.S{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px}
+.SL{font-size:11px;color:var(--color-text-secondary);margin:0 0 2px}
+.SV{font-size:20px;font-weight:500;margin:0}
+.C{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px}
+.B{font-size:10px;padding:2px 8px;border-radius:12px;font-weight:500;display:inline-block}
+.GS{border-radius:5px;padding:7px 0;text-align:center;color:white;font-size:11px;font-weight:500;cursor:pointer;transition:transform .1s}
+.GS:hover{transform:scale(1.08)}
+.T{font-size:13px;font-weight:500;color:var(--color-text-primary);margin:0 0 8px}
+.BP{width:100%;background:#378ADD;color:white;border:none;padding:9px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer}
+.BO{background:none;border:0.5px solid var(--color-border-secondary);padding:7px 14px;border-radius:var(--border-radius-md);font-size:12px;cursor:pointer;color:var(--color-text-primary)}
+.FP{font-size:11px;padding:4px 9px;border-radius:20px;cursor:pointer}
+.TG{width:34px;height:18px;border-radius:9px;position:relative;cursor:pointer;background:#378ADD}
+.TK{width:14px;height:14px;background:white;border-radius:50%;position:absolute;top:2px;right:2px}
+.IC{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* small utility to center pages */
+.pw-center{min-height:480px;display:flex;align-items:center;justify-content:center}
+
+/* grid for spots */
+#gA,#gB{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:10px}
+.GS[data-status="r"]{cursor:default;opacity:0.75}
+
+/* responsive tweaks */
+@media (max-width: 640px){
+  .A{min-height:unset}
+  #gA,#gB{grid-template-columns:repeat(3,1fr)}
+}

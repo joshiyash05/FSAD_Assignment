@@ -1,37 +1,24 @@
 <template>
-  <nav class="flex items-center justify-between px-4 py-2.5 border-b border-gray-200 bg-white">
-    <router-link to="/" class="flex items-center gap-2">
-      <div class="w-7 h-7 bg-primary rounded-lg flex items-center justify-center text-white text-xs font-medium">P</div>
-      <span class="text-base font-medium">ParkWise</span>
-    </router-link>
+  <nav class="N">
+    <div class="NL">
+      <div class="NI">P</div>
+      <span class="NT">ParkWise</span>
+    </div>
 
-    <div class="flex items-center gap-3 text-sm">
+    <div class="NR">
       <router-link
         v-for="link in navLinks"
         :key="link.to"
         :to="link.to"
-        class="px-2 py-1 rounded-lg"
-        :class="$route.name === link.name
-          ? 'bg-primary-light text-primary-dark font-medium'
-          : 'text-gray-500 hover:bg-gray-50'"
+        class="NB"
+        :class="$route.name === link.name ? 'NA' : ''"
       >
         {{ link.label }}
       </router-link>
 
-      <div v-if="authStore.isAdmin"
-        class="ml-1">
-        <router-link to="/admin"
-          class="px-2 py-1 rounded-lg"
-          :class="$route.name === 'admin'
-            ? 'bg-primary-light text-primary-dark font-medium'
-            : 'text-gray-500 hover:bg-gray-50'"
-        >Admin</router-link>
-      </div>
+      <router-link v-if="authStore.isAdmin" to="/admin" class="NB" :class="$route.name === 'admin' ? 'NA' : ''">Admin</router-link>
 
-      <div class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-500 cursor-pointer"
-           @click="goProfile">
-        {{ authStore.initials }}
-      </div>
+      <div class="AV" @click="goProfile">{{ authStore.initials }}</div>
     </div>
   </nav>
 </template>

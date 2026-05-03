@@ -1,0 +1,527 @@
+<h2 class="sr-only">ParkWise complete interactive prototype — login, dashboard with date picker, parking grid, payment, confirmation, bookings, nearby, profile, and admin screens</h2>
+<style>
+*{box-sizing:border-box}
+.P{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:10px}
+.A{background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);overflow:hidden;min-height:520px}
+.N{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.NL{display:flex;align-items:center;gap:6px}
+.NI{width:26px;height:26px;border-radius:var(--border-radius-md);background:#378ADD;display:flex;align-items:center;justify-content:center;color:white;font-weight:500;font-size:11px}
+.NT{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.NR{display:flex;align-items:center;gap:10px;font-size:12px}
+.NB{color:var(--color-text-secondary);cursor:pointer;padding:4px 8px;border-radius:var(--border-radius-md)}
+.NB:hover{background:var(--color-background-secondary)}
+.NA{color:#0C447C;font-weight:500;background:#E6F1FB;border-radius:var(--border-radius-md);padding:4px 8px}
+.AV{width:28px;height:28px;border-radius:50%;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--color-text-secondary)}
+.PG{display:none;padding:14px}
+.PG.on{display:block}
+.S{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px}
+.SL{font-size:11px;color:var(--color-text-secondary);margin:0 0 2px}
+.SV{font-size:20px;font-weight:500;margin:0}
+.C{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px}
+.B{font-size:10px;padding:2px 8px;border-radius:12px;font-weight:500;display:inline-block}
+.GS{border-radius:5px;padding:7px 0;text-align:center;color:white;font-size:11px;font-weight:500;cursor:pointer;transition:transform .1s}
+.GS:hover{transform:scale(1.08)}
+.T{font-size:13px;font-weight:500;color:var(--color-text-primary);margin:0 0 8px}
+.BP{width:100%;background:#378ADD;color:white;border:none;padding:9px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer}
+.BO{background:none;border:0.5px solid var(--color-border-secondary);padding:7px 14px;border-radius:var(--border-radius-md);font-size:12px;cursor:pointer;color:var(--color-text-primary)}
+.FP{font-size:11px;padding:4px 9px;border-radius:20px;cursor:pointer}
+.TG{width:34px;height:18px;border-radius:9px;position:relative;cursor:pointer;background:#378ADD}
+.TK{width:14px;height:14px;background:white;border-radius:50%;position:absolute;top:2px;right:2px}
+.IC{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+</style>
+
+<div class="P">
+<div class="A">
+
+<div class="N" id="nav-bar" style="display:none">
+  <div class="NL"><div class="NI">P</div><span class="NT">ParkWise</span></div>
+  <div class="NR">
+    <span class="NB NA" data-p="dashboard">Dashboard</span>
+    <span class="NB" data-p="bookings">My bookings</span>
+    <span class="NB" data-p="nearby">Nearby</span>
+    <span class="NB" data-p="profile">Profile</span>
+    <span class="NB" data-p="admin">Admin</span>
+    <div class="AV">YK</div>
+  </div>
+</div>
+
+<div id="pg-login" class="PG on">
+  <div style="display:flex;align-items:center;justify-content:center;min-height:480px">
+    <div style="width:310px">
+      <div style="text-align:center;margin-bottom:1.5rem">
+        <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div class="NI" style="width:36px;height:36px;font-size:14px">P</div>
+          <span style="font-size:20px;font-weight:500;color:var(--color-text-primary)">ParkWise</span>
+        </div>
+        <p style="font-size:13px;color:var(--color-text-secondary);margin:4px 0 0">Find, book, and pay for parking in seconds</p>
+      </div>
+      <div id="login-form">
+        <div style="margin-bottom:10px">
+          <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:3px">Email</label>
+          <input type="text" placeholder="you@example.com" style="width:100%;font-size:13px;padding:8px 10px" />
+        </div>
+        <div style="margin-bottom:14px">
+          <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:3px">Password</label>
+          <input type="password" placeholder="Enter password" style="width:100%;font-size:13px;padding:8px 10px" />
+        </div>
+        <button class="BP" onclick="go('dashboard')">Sign in</button>
+        <p style="text-align:center;font-size:12px;color:var(--color-text-secondary);margin:10px 0 0">Don't have an account? <span style="color:#0C447C;cursor:pointer" onclick="showReg()">Register</span></p>
+      </div>
+      <div id="reg-form" style="display:none">
+        <div style="margin-bottom:10px">
+          <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:3px">Full name</label>
+          <input type="text" placeholder="Yash Kumar" style="width:100%;font-size:13px;padding:8px 10px" />
+        </div>
+        <div style="margin-bottom:10px">
+          <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:3px">Email</label>
+          <input type="text" placeholder="you@example.com" style="width:100%;font-size:13px;padding:8px 10px" />
+        </div>
+        <div style="margin-bottom:10px">
+          <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:3px">Phone</label>
+          <input type="text" placeholder="+91 98765 43210" style="width:100%;font-size:13px;padding:8px 10px" />
+        </div>
+        <div style="margin-bottom:14px">
+          <label style="font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:3px">Password</label>
+          <input type="password" placeholder="Create password" style="width:100%;font-size:13px;padding:8px 10px" />
+        </div>
+        <button class="BP" onclick="go('dashboard')">Create account</button>
+        <p style="text-align:center;font-size:12px;color:var(--color-text-secondary);margin:10px 0 0">Already registered? <span style="color:#0C447C;cursor:pointer" onclick="showLogin()">Sign in</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="pg-dashboard" class="PG">
+  <div style="background:#E6F1FB;border-radius:var(--border-radius-lg);padding:12px;margin-bottom:12px">
+    <p style="font-size:13px;font-weight:500;color:#0C447C;margin:0 0 8px">When do you want to park?</p>
+    <div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <label style="font-size:11px;color:#185FA5;display:block;margin-bottom:3px">Date</label>
+        <div id="date-row" style="display:flex;gap:5px"></div>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#185FA5;display:block;margin-bottom:3px">Start</label>
+        <select id="sel-start" style="font-size:12px;padding:7px 8px;min-width:90px" onchange="calcDur()">
+          <option>8:00 AM</option><option selected>9:00 AM</option><option>10:00 AM</option><option>11:00 AM</option><option>12:00 PM</option><option>1:00 PM</option><option>2:00 PM</option><option>3:00 PM</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#185FA5;display:block;margin-bottom:3px">End</label>
+        <select id="sel-end" style="font-size:12px;padding:7px 8px;min-width:90px" onchange="calcDur()">
+          <option>12:00 PM</option><option>1:00 PM</option><option>2:00 PM</option><option>3:00 PM</option><option>4:00 PM</option><option selected>5:00 PM</option><option>6:00 PM</option><option>7:00 PM</option><option>8:00 PM</option>
+        </select>
+      </div>
+      <div style="background:var(--color-background-primary);border-radius:var(--border-radius-md);padding:7px 12px;text-align:center;border:0.5px solid var(--color-border-tertiary)">
+        <p style="font-size:10px;color:var(--color-text-tertiary);margin:0">Duration</p>
+        <p id="dur-val" style="font-size:14px;font-weight:500;color:#0C447C;margin:2px 0 0">8 hours</p>
+      </div>
+      <button class="BP" style="padding:8px 16px;width:auto;display:flex;align-items:center;gap:5px;white-space:nowrap" onclick="findSpots()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        Find spots
+      </button>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <div class="S" style="flex:1"><p class="SL">Available</p><p class="SV" style="color:#0F6E56" id="avail-count">18 <span style="font-size:12px;font-weight:400;color:var(--color-text-secondary)">of 30</span></p></div>
+    <div class="S" style="flex:1"><p class="SL">Free in next 3h</p><p class="SV" style="color:#0C447C">23</p></div>
+    <div class="S" style="flex:1"><p class="SL">Est. cost</p><p class="SV" style="color:var(--color-text-primary)" id="est-cost">₹189</p></div>
+    <div class="S" style="flex:1"><p class="SL">Your selection</p><p class="SV" id="sel-label" style="color:var(--color-text-tertiary)">None</p></div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-bottom:10px;justify-content:space-between;align-items:center">
+    <div style="display:flex;gap:8px;font-size:11px;color:var(--color-text-secondary)">
+      <div style="display:flex;align-items:center;gap:3px"><div style="width:10px;height:10px;border-radius:3px;background:#1D9E75"></div>Available</div>
+      <div style="display:flex;align-items:center;gap:3px"><div style="width:10px;height:10px;border-radius:3px;background:#E24B4A"></div>Occupied</div>
+      <div style="display:flex;align-items:center;gap:3px"><div style="width:10px;height:10px;border-radius:3px;background:#EF9F27"></div>Selected</div>
+      <div style="display:flex;align-items:center;gap:3px"><div style="width:10px;height:10px;border-radius:3px;background:#378ADD"></div>Soon</div>
+    </div>
+    <div style="display:flex;gap:4px">
+      <span class="FP" style="border:0.5px solid #378ADD;color:#0C447C;background:#E6F1FB">All</span>
+      <span class="FP" style="border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)">Near gate</span>
+      <span class="FP" style="border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)">EV</span>
+      <span class="FP" style="border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)">Covered</span>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px">
+    <div style="flex:1">
+      <p style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin:0 0 5px">Zone A — Near gate 1</p>
+      <div id="gA" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:10px"></div>
+      <p style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin:0 0 5px">Zone B — Near elevator</p>
+      <div id="gB" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:12px"></div>
+
+      <div style="display:flex;gap:8px">
+        <div class="S" style="flex:1;padding:8px">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+            <div class="IC" style="background:#FAEEDA"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#854F0B" stroke-width="2.5"><path d="M3 22V6l6-4 6 4 6-4v16l-6 4-6-4-6 4z"/></svg></div>
+            <span style="font-size:12px;font-weight:500;color:var(--color-text-primary)">HP Petrol</span>
+          </div>
+          <p style="font-size:11px;color:var(--color-text-secondary);margin:0">200m</p>
+          <p style="font-size:10px;color:#0F6E56;margin:2px 0 0">Open</p>
+        </div>
+        <div class="S" style="flex:1;padding:8px">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+            <div class="IC" style="background:#E6F1FB"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+            <span style="font-size:12px;font-weight:500;color:var(--color-text-primary)">EV charging</span>
+          </div>
+          <p style="font-size:11px;color:var(--color-text-secondary);margin:0">Zone B</p>
+          <p style="font-size:10px;color:#185FA5;margin:2px 0 0">2/4 free</p>
+        </div>
+        <div class="S" style="flex:1;padding:8px">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+            <div class="IC" style="background:#FCEBEB"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="2.5"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg></div>
+            <span style="font-size:12px;font-weight:500;color:var(--color-text-primary)">CCD</span>
+          </div>
+          <p style="font-size:11px;color:var(--color-text-secondary);margin:0">100m</p>
+          <p style="font-size:10px;color:#0F6E56;margin:2px 0 0">Open</p>
+        </div>
+        <div class="S" style="flex:1;padding:8px">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+            <div class="IC" style="background:#E1F5EE"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg></div>
+            <span style="font-size:12px;font-weight:500;color:var(--color-text-primary)">MedPlus</span>
+          </div>
+          <p style="font-size:11px;color:var(--color-text-secondary);margin:0">350m</p>
+          <p style="font-size:10px;color:#0F6E56;margin:2px 0 0">Open</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="side" style="width:185px;display:none">
+      <div style="border:2px solid #378ADD;border-radius:var(--border-radius-lg);padding:12px;background:var(--color-background-primary)">
+        <p id="s-title" class="T" style="margin-bottom:6px">Spot A1</p>
+        <div style="font-size:11px;margin-bottom:8px;display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--color-text-secondary)">Date</span><span id="s-date" style="color:var(--color-text-primary)">29 Apr</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--color-text-secondary)">Time</span><span id="s-time" style="color:var(--color-text-primary)">9 AM – 5 PM</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--color-text-secondary)">Duration</span><span id="s-dur" style="color:var(--color-text-primary)">8h</span></div>
+        </div>
+        <div style="margin-bottom:8px">
+          <label style="font-size:10px;color:var(--color-text-secondary);display:block;margin-bottom:2px">Vehicle</label>
+          <select style="width:100%;font-size:11px;padding:5px 6px"><option>MH 02 AB 1234</option><option>MH 02 CD 5678</option></select>
+        </div>
+        <div style="border-top:0.5px solid var(--color-border-tertiary);padding-top:6px;margin-bottom:8px;font-size:11px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="color:var(--color-text-secondary)">Rate</span><span id="s-rate" style="color:var(--color-text-primary)">₹160</span></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="color:var(--color-text-secondary)">GST 18%</span><span id="s-gst" style="color:var(--color-text-primary)">₹28.80</span></div>
+          <div style="display:flex;justify-content:space-between;font-weight:500;font-size:12px;padding-top:4px;border-top:0.5px solid var(--color-border-tertiary)"><span style="color:var(--color-text-primary)">Total</span><span id="s-total" style="color:var(--color-text-primary)">₹188.80</span></div>
+        </div>
+        <button class="BP" style="font-size:12px;padding:8px" onclick="go('payment')">Pay ₹188.80</button>
+        <p style="text-align:center;font-size:10px;color:var(--color-text-tertiary);margin:4px 0 0">Secured by Razorpay</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="pg-payment" class="PG">
+  <div id="step-bar-pay" style="display:flex;align-items:center;justify-content:center;margin-bottom:16px;padding:0 80px"></div>
+  <div style="display:flex;gap:12px;max-width:480px;margin:0 auto">
+    <div class="C" style="flex:1">
+      <p class="T">Order summary</p>
+      <div class="S" style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div><p style="font-size:12px;font-weight:500;margin:0;color:var(--color-text-primary)">Spot A3 — Zone A</p><p style="font-size:11px;color:var(--color-text-secondary);margin:2px 0 0">29 Apr, 9 AM – 5 PM</p></div>
+          <div style="width:30px;height:30px;background:#1D9E75;border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:500">A3</div>
+        </div>
+        <div style="display:flex;gap:10px;font-size:11px;padding-top:6px;border-top:0.5px solid var(--color-border-tertiary)">
+          <span style="color:var(--color-text-tertiary)">Vehicle:</span><span style="color:var(--color-text-primary)">MH 02 AB 1234</span>
+          <span style="color:var(--color-text-tertiary)">Duration:</span><span style="color:var(--color-text-primary)">8h</span>
+        </div>
+      </div>
+      <div style="font-size:11px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--color-text-secondary)">Base rate</span><span style="color:var(--color-text-primary)">₹160.00</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:var(--color-text-secondary)">GST (18%)</span><span style="color:var(--color-text-primary)">₹28.80</span></div>
+        <div style="display:flex;justify-content:space-between;font-weight:500;font-size:12px;padding-top:4px;border-top:0.5px solid var(--color-border-tertiary)"><span style="color:var(--color-text-primary)">Total</span><span style="color:var(--color-text-primary)">₹188.80</span></div>
+      </div>
+    </div>
+    <div class="C" style="flex:1">
+      <p class="T">Razorpay checkout</p>
+      <div style="display:flex;align-items:center;gap:6px;padding-bottom:8px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:8px">
+        <div class="NI" style="width:22px;height:22px;font-size:9px">P</div>
+        <div style="flex:1"><p style="font-size:11px;font-weight:500;margin:0;color:var(--color-text-primary)">ParkWise</p></div>
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">₹188.80</span>
+      </div>
+      <p style="font-size:11px;color:var(--color-text-secondary);margin:0 0 6px">Payment method</p>
+      <div style="border:2px solid #378ADD;border-radius:var(--border-radius-md);padding:7px;margin-bottom:5px;display:flex;align-items:center;gap:6px">
+        <div style="width:14px;height:14px;border-radius:50%;border:2px solid #378ADD;display:flex;align-items:center;justify-content:center"><div style="width:7px;height:7px;border-radius:50%;background:#378ADD"></div></div>
+        <span style="font-size:12px;color:var(--color-text-primary)">UPI</span>
+      </div>
+      <div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:7px;margin-bottom:5px;display:flex;align-items:center;gap:6px">
+        <div style="width:14px;height:14px;border-radius:50%;border:2px solid var(--color-border-tertiary)"></div>
+        <span style="font-size:12px;color:var(--color-text-primary)">Card</span>
+      </div>
+      <div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:7px;margin-bottom:5px;display:flex;align-items:center;gap:6px">
+        <div style="width:14px;height:14px;border-radius:50%;border:2px solid var(--color-border-tertiary)"></div>
+        <span style="font-size:12px;color:var(--color-text-primary)">Net banking</span>
+      </div>
+      <div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:7px;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+        <div style="width:14px;height:14px;border-radius:50%;border:2px solid var(--color-border-tertiary)"></div>
+        <span style="font-size:12px;color:var(--color-text-primary)">Wallet</span>
+      </div>
+      <button class="BP" style="background:#1D9E75;font-size:12px" onclick="go('confirm')">Pay ₹188.80</button>
+      <p style="text-align:center;font-size:10px;color:var(--color-text-tertiary);margin:4px 0 0">Powered by Razorpay</p>
+    </div>
+  </div>
+</div>
+
+<div id="pg-confirm" class="PG">
+  <div id="step-bar-conf" style="display:flex;align-items:center;justify-content:center;margin-bottom:16px;padding:0 80px"></div>
+  <div style="max-width:320px;margin:0 auto;text-align:center">
+    <div style="width:44px;height:44px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;margin:0 auto 8px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <p style="font-size:16px;font-weight:500;margin:0;color:#0F6E56">Booking confirmed!</p>
+    <p style="font-size:12px;color:var(--color-text-secondary);margin:4px 0 14px">Order #PKW-20260429-0042</p>
+    <div class="S" style="text-align:left;margin-bottom:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px">
+        <div><p style="color:var(--color-text-tertiary);margin:0">Spot</p><p style="color:var(--color-text-primary);font-weight:500;margin:2px 0 0">A3 — Zone A</p></div>
+        <div><p style="color:var(--color-text-tertiary);margin:0">Vehicle</p><p style="color:var(--color-text-primary);font-weight:500;margin:2px 0 0">MH 02 AB 1234</p></div>
+        <div><p style="color:var(--color-text-tertiary);margin:0">Time</p><p style="color:var(--color-text-primary);font-weight:500;margin:2px 0 0">9 AM – 5 PM</p></div>
+        <div><p style="color:var(--color-text-tertiary);margin:0">Paid</p><p style="color:#0F6E56;font-weight:500;margin:2px 0 0">₹188.80</p></div>
+      </div>
+    </div>
+    <div style="display:inline-block;background:white;border-radius:var(--border-radius-md);padding:6px;border:0.5px solid var(--color-border-tertiary);margin-bottom:6px">
+      <svg width="68" height="68" viewBox="0 0 68 68"><rect width="68" height="68" fill="white" rx="4"/><g fill="#1a1a1a"><rect x="6" y="6" width="4" height="4"/><rect x="10" y="6" width="4" height="4"/><rect x="14" y="6" width="4" height="4"/><rect x="18" y="6" width="4" height="4"/><rect x="22" y="6" width="4" height="4"/><rect x="30" y="6" width="4" height="4"/><rect x="42" y="6" width="4" height="4"/><rect x="46" y="6" width="4" height="4"/><rect x="50" y="6" width="4" height="4"/><rect x="54" y="6" width="4" height="4"/><rect x="58" y="6" width="4" height="4"/><rect x="6" y="10" width="4" height="4"/><rect x="22" y="10" width="4" height="4"/><rect x="34" y="10" width="4" height="4"/><rect x="42" y="10" width="4" height="4"/><rect x="58" y="10" width="4" height="4"/><rect x="6" y="14" width="4" height="4"/><rect x="14" y="14" width="4" height="4"/><rect x="22" y="14" width="4" height="4"/><rect x="30" y="14" width="4" height="4"/><rect x="38" y="14" width="4" height="4"/><rect x="42" y="14" width="4" height="4"/><rect x="50" y="14" width="4" height="4"/><rect x="58" y="14" width="4" height="4"/></g></svg>
+    </div>
+    <p style="font-size:11px;color:var(--color-text-secondary);margin:0 0 10px">Show this QR at entry gate</p>
+    <div style="display:flex;gap:8px">
+      <button class="BO" style="flex:1;font-size:11px;padding:7px">Download receipt</button>
+      <button class="BP" style="flex:1;font-size:11px;padding:7px" onclick="go('bookings')">My bookings</button>
+    </div>
+    <div style="margin-top:10px;background:#FAEEDA;border-radius:var(--border-radius-md);padding:7px;display:flex;align-items:start;gap:5px;text-align:left">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#854F0B" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <p style="font-size:10px;color:#633806;margin:0">Cancel 1h before start for full refund. Late cancellations non-refundable.</p>
+    </div>
+  </div>
+</div>
+
+<div id="pg-bookings" class="PG">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <p class="T" style="font-size:15px;margin:0">My bookings</p>
+    <div style="display:flex;gap:5px">
+      <span class="FP" style="background:#378ADD;color:white">Active</span>
+      <span class="FP" style="background:var(--color-background-secondary);color:var(--color-text-secondary)">Completed</span>
+      <span class="FP" style="background:var(--color-background-secondary);color:var(--color-text-secondary)">Cancelled</span>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px">
+    <div style="flex:1;border:2px solid #378ADD;border-radius:var(--border-radius-lg);padding:12px">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px">
+        <div><p style="font-size:13px;font-weight:500;margin:0;color:var(--color-text-primary)">Spot A3 — Zone A</p><p style="font-size:11px;color:var(--color-text-secondary);margin:2px 0 0">29 Apr, 9 AM – 5 PM</p></div>
+        <span class="B" style="background:#E1F5EE;color:#0F6E56">Active</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary);margin-bottom:8px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="22" height="12" rx="2"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+        MH 02 AB 1234
+      </div>
+      <div style="background:#E6F1FB;border-radius:var(--border-radius-md);padding:6px 8px;display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span id="countdown" style="font-size:12px;font-weight:500;color:#0C447C">7h 12m remaining</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding-top:8px;border-top:0.5px solid var(--color-border-tertiary)">
+        <div style="width:56px;height:56px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center">
+          <svg width="40" height="40" viewBox="0 0 56 56"><rect width="56" height="56" fill="white" rx="4"/><g fill="#1a1a1a"><rect x="4" y="4" width="4" height="4"/><rect x="8" y="4" width="4" height="4"/><rect x="12" y="4" width="4" height="4"/><rect x="16" y="4" width="4" height="4"/><rect x="20" y="4" width="4" height="4"/><rect x="28" y="4" width="4" height="4"/><rect x="36" y="4" width="4" height="4"/><rect x="40" y="4" width="4" height="4"/><rect x="44" y="4" width="4" height="4"/><rect x="48" y="4" width="4" height="4"/></g></svg>
+        </div>
+        <div style="flex:1"><p style="font-size:10px;color:var(--color-text-secondary);margin:0 0 4px">Show QR at entry</p><button class="BO" style="font-size:10px;padding:3px 8px;color:#A32D2D;border-color:#A32D2D">Cancel</button></div>
+        <div style="text-align:right"><p style="font-size:10px;color:var(--color-text-tertiary);margin:0">Paid</p><p style="font-size:14px;font-weight:500;color:#0F6E56;margin:2px 0 0">₹189</p></div>
+      </div>
+    </div>
+    <div style="flex:1;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px">
+        <div><p style="font-size:13px;font-weight:500;margin:0;color:var(--color-text-primary)">Spot B7 — Zone B</p><p style="font-size:11px;color:var(--color-text-secondary);margin:2px 0 0">28 Apr, 10 AM – 2 PM</p></div>
+        <span class="B" style="background:var(--color-background-secondary);color:var(--color-text-secondary)">Completed</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary);margin-bottom:8px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="22" height="12" rx="2"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+        MH 02 CD 5678
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding-top:8px;border-top:0.5px solid var(--color-border-tertiary);margin-top:auto">
+        <div style="flex:1"><p style="font-size:11px;color:var(--color-text-secondary);margin:0">Completed 28 Apr, 2 PM</p></div>
+        <div style="text-align:right"><p style="font-size:10px;color:var(--color-text-tertiary);margin:0">Paid</p><p style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin:2px 0 0">₹96</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="pg-nearby" class="PG">
+  <p class="T" style="font-size:15px;margin-bottom:12px">Nearby amenities</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="C" style="display:flex;gap:10px;align-items:start"><div style="width:36px;height:36px;border-radius:var(--border-radius-md);background:#FAEEDA;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#854F0B" stroke-width="2"><path d="M3 22V6l6-4 6 4 6-4v16l-6 4-6-4-6 4z"/></svg></div><div><p style="font-size:12px;font-weight:500;margin:0;color:var(--color-text-primary)">HP Petrol Pump</p><p style="font-size:11px;color:var(--color-text-secondary);margin:2px 0 0">200m from gate 1</p><span class="B" style="background:#E1F5EE;color:#0F6E56;margin-top:4px">Open 6AM–11PM</span></div></div>
+    <div class="C" style="display:flex;gap:10px;align-items:start"><div style="width:36px;height:36px;border-radius:var(--border-radius-md);background:#E6F1FB;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><div><p style="font-size:12px;font-weight:500;margin:0;color:var(--color-text-primary)">EV Charging Station</p><p style="font-size:11px;color:var(--color-text-secondary);margin:2px 0 0">Inside lot — Zone B</p><span class="B" style="background:#E6F1FB;color:#185FA5;margin-top:4px">2 of 4 free</span></div></div>
+    <div class="C" style="display:flex;gap:10px;align-items:start"><div style="width:36px;height:36px;border-radius:var(--border-radius-md);background:#FCEBEB;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg></div><div><p style="font-size:12px;font-weight:500;margin:0;color:var(--color-text-primary)">Cafe Coffee Day</p><p style="font-size:11px;color:var(--color-text-secondary);margin:2px 0 0">100m from gate 1</p><span class="B" style="background:#E1F5EE;color:#0F6E56;margin-top:4px">Open 8AM–10PM</span></div></div>
+    <div class="C" style="display:flex;gap:10px;align-items:start"><div style="width:36px;height:36px;border-radius:var(--border-radius-md);background:#E1F5EE;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg></div><div><p style="font-size:12px;font-weight:500;margin:0;color:var(--color-text-primary)">MedPlus Pharmacy</p><p style="font-size:11px;color:var(--color-text-secondary);margin:2px 0 0">350m from gate 2</p><span class="B" style="background:#E1F5EE;color:#0F6E56;margin-top:4px">Open 8AM–10PM</span></div></div>
+    <div class="C" style="display:flex;gap:10px;align-items:start"><div style="width:36px;height:36px;border-radius:var(--border-radius-md);background:#EEEDFE;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M6 10h4M14 10h4"/></svg></div><div><p style="font-size:12px;font-weight:500;margin:0;color:var(--color-text-primary)">SBI ATM</p><p style="font-size:11px;color:var(--color-text-secondary);margin:2px 0 0">150m from gate 1</p><span class="B" style="background:#EEEDFE;color:#3C3489;margin-top:4px">24 hours</span></div></div>
+    <div class="C" style="display:flex;gap:10px;align-items:start"><div style="width:36px;height:36px;border-radius:var(--border-radius-md);background:#FAEEDA;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#854F0B" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><p style="font-size:12px;font-weight:500;margin:0;color:var(--color-text-primary)">Indian Oil Pump</p><p style="font-size:11px;color:var(--color-text-secondary);margin:2px 0 0">500m from gate 2</p><span class="B" style="background:#E1F5EE;color:#0F6E56;margin-top:4px">Open 24 hours</span></div></div>
+  </div>
+</div>
+
+<div id="pg-profile" class="PG">
+  <div style="display:flex;gap:10px">
+    <div style="flex:1">
+      <div class="C" style="margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div style="width:44px;height:44px;border-radius:50%;background:#E6F1FB;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;color:#185FA5">YK</div>
+          <div style="flex:1"><p style="font-size:14px;font-weight:500;margin:0;color:var(--color-text-primary)">Yash Kumar</p><p style="font-size:11px;color:var(--color-text-secondary);margin:2px 0 0">yash.kumar@email.com</p><p style="font-size:11px;color:var(--color-text-tertiary);margin:2px 0 0">+91 98765 43210</p></div>
+          <button class="BO" style="font-size:11px;padding:5px 10px">Edit</button>
+        </div>
+      </div>
+      <div class="C" style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><p class="T" style="margin:0">My vehicles</p><button class="BO" style="font-size:11px;padding:3px 8px">+ Add</button></div>
+        <div style="display:flex;gap:8px">
+          <div style="flex:1;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px;border:2px solid #378ADD">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px"><span style="font-size:12px;font-weight:500;color:var(--color-text-primary)">MH 02 AB 1234</span><span class="B" style="background:#E6F1FB;color:#185FA5">Default</span></div>
+            <p style="font-size:11px;color:var(--color-text-secondary);margin:0">Hyundai Creta — White</p>
+            <p style="font-size:10px;color:var(--color-text-tertiary);margin:2px 0 0">SUV — Petrol</p>
+          </div>
+          <div style="flex:1;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px"><span style="font-size:12px;font-weight:500;color:var(--color-text-primary)">MH 02 CD 5678</span><span style="font-size:10px;color:var(--color-text-tertiary);cursor:pointer">Set default</span></div>
+            <p style="font-size:11px;color:var(--color-text-secondary);margin:0">Honda Activa 6G — Black</p>
+            <p style="font-size:10px;color:var(--color-text-tertiary);margin:2px 0 0">Two-wheeler</p>
+          </div>
+        </div>
+      </div>
+      <div class="C">
+        <p class="T">Preferences</p>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div><p style="font-size:12px;color:var(--color-text-primary);margin:0">Booking reminders</p><p style="font-size:10px;color:var(--color-text-tertiary);margin:1px 0 0">30 min before start</p></div><div class="TG"><div class="TK"></div></div></div>
+        <div style="border-top:0.5px solid var(--color-border-tertiary);padding-top:8px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div><p style="font-size:12px;color:var(--color-text-primary);margin:0">Expiry alerts</p><p style="font-size:10px;color:var(--color-text-tertiary);margin:1px 0 0">Alert when booking expires</p></div><div class="TG"><div class="TK"></div></div></div>
+        <div style="border-top:0.5px solid var(--color-border-tertiary);padding-top:8px;display:flex;justify-content:space-between;align-items:center"><div><p style="font-size:12px;color:var(--color-text-primary);margin:0">Preferred zone</p></div><select style="font-size:11px;padding:3px 6px"><option>Zone A</option><option>Zone B</option><option>Any</option></select></div>
+      </div>
+    </div>
+    <div style="width:190px">
+      <div class="C" style="margin-bottom:10px">
+        <p class="T">Stats</p>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="S" style="padding:8px"><p class="SL">Bookings</p><p style="font-size:16px;font-weight:500;margin:0;color:var(--color-text-primary)">27</p></div>
+          <div class="S" style="padding:8px"><p class="SL">Hours parked</p><p style="font-size:16px;font-weight:500;margin:0;color:#0C447C">86h</p></div>
+          <div class="S" style="padding:8px"><p class="SL">Cancellations</p><p style="font-size:16px;font-weight:500;margin:0;color:#A32D2D">2</p></div>
+          <div class="S" style="padding:8px"><p class="SL">Favourite</p><p style="font-size:16px;font-weight:500;margin:0;color:#0F6E56">A6</p></div>
+        </div>
+      </div>
+      <div class="C">
+        <p class="T">Activity</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:6px;align-items:start"><div style="width:7px;height:7px;border-radius:50%;background:#1D9E75;margin-top:4px;flex-shrink:0"></div><div><p style="font-size:11px;color:var(--color-text-primary);margin:0">Booked A3</p><p style="font-size:10px;color:var(--color-text-tertiary);margin:1px 0 0">Today 9 AM</p></div></div>
+          <div style="display:flex;gap:6px;align-items:start"><div style="width:7px;height:7px;border-radius:50%;background:var(--color-text-tertiary);margin-top:4px;flex-shrink:0"></div><div><p style="font-size:11px;color:var(--color-text-primary);margin:0">Completed B7</p><p style="font-size:10px;color:var(--color-text-tertiary);margin:1px 0 0">Yesterday 2 PM</p></div></div>
+          <div style="display:flex;gap:6px;align-items:start"><div style="width:7px;height:7px;border-radius:50%;background:#E24B4A;margin-top:4px;flex-shrink:0"></div><div><p style="font-size:11px;color:var(--color-text-primary);margin:0">Cancelled A12</p><p style="font-size:10px;color:var(--color-text-tertiary);margin:1px 0 0">27 Apr</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="pg-admin" class="PG">
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px"><p class="T" style="font-size:15px;margin:0">Admin panel</p><span class="B" style="background:#FAEEDA;color:#633806">Admin</span></div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <div class="S" style="flex:1"><p class="SL">Users</p><p class="SV" style="color:var(--color-text-primary)">84</p></div>
+    <div class="S" style="flex:1"><p class="SL">Active bookings</p><p class="SV" style="color:#0C447C">12</p></div>
+    <div class="S" style="flex:1"><p class="SL">Revenue today</p><p class="SV" style="color:#0F6E56">₹4,280</p></div>
+    <div class="S" style="flex:1"><p class="SL">Occupancy</p><p class="SV" style="color:#A32D2D">40%</p></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><p class="T" style="margin:0">Reservations</p><input type="text" placeholder="Search user or spot..." style="width:170px;font-size:12px;padding:6px 8px"/></div>
+  <div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 2fr 1fr 1fr;padding:6px 10px;background:var(--color-background-secondary);font-size:11px;color:var(--color-text-secondary);font-weight:500"><span>User</span><span>Spot</span><span>Vehicle</span><span>Time</span><span>Amount</span><span>Status</span></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 2fr 1fr 1fr;padding:8px 10px;border-top:0.5px solid var(--color-border-tertiary);font-size:12px;align-items:center"><span style="color:var(--color-text-primary)">Yash K.</span><span style="color:var(--color-text-secondary)">A3</span><span style="color:var(--color-text-secondary)">MH02AB</span><span style="color:var(--color-text-secondary)">29 Apr 9A–5P</span><span style="color:#0F6E56">₹189</span><span class="B" style="background:#E1F5EE;color:#0F6E56">Active</span></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 2fr 1fr 1fr;padding:8px 10px;border-top:0.5px solid var(--color-border-tertiary);font-size:12px;align-items:center"><span style="color:var(--color-text-primary)">Priya S.</span><span style="color:var(--color-text-secondary)">B7</span><span style="color:var(--color-text-secondary)">MH04XY</span><span style="color:var(--color-text-secondary)">29 Apr 10A–2P</span><span style="color:#0F6E56">₹96</span><span class="B" style="background:#E1F5EE;color:#0F6E56">Active</span></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 2fr 1fr 1fr;padding:8px 10px;border-top:0.5px solid var(--color-border-tertiary);font-size:12px;align-items:center"><span style="color:var(--color-text-primary)">Arjun M.</span><span style="color:var(--color-text-secondary)">A12</span><span style="color:var(--color-text-secondary)">KA01MN</span><span style="color:var(--color-text-secondary)">28 Apr 8A–12P</span><span style="color:var(--color-text-secondary)">₹96</span><span class="B" style="background:var(--color-background-secondary);color:var(--color-text-secondary)">Done</span></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 2fr 1fr 1fr;padding:8px 10px;border-top:0.5px solid var(--color-border-tertiary);font-size:12px;align-items:center"><span style="color:var(--color-text-primary)">Meera R.</span><span style="color:var(--color-text-secondary)">A2</span><span style="color:var(--color-text-secondary)">MH12PQ</span><span style="color:var(--color-text-secondary)">27 Apr 1P–6P</span><span style="color:var(--color-text-secondary)">₹0</span><span class="B" style="background:#FCEBEB;color:#A32D2D">Cancelled</span></div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 2fr 1fr 1fr;padding:8px 10px;border-top:0.5px solid var(--color-border-tertiary);font-size:12px;align-items:center"><span style="color:var(--color-text-primary)">Rohan D.</span><span style="color:var(--color-text-secondary)">B3</span><span style="color:var(--color-text-secondary)">GJ05RS</span><span style="color:var(--color-text-secondary)">27 Apr 9A–1P</span><span style="color:#0F6E56">₹96</span><span class="B" style="background:var(--color-background-secondary);color:var(--color-text-secondary)">Done</span></div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<script>
+var CL={g:"#1D9E75",r:"#E24B4A",b:"#378ADD",y:"#EF9F27"};
+var zA=[{id:"A1",s:"g"},{id:"A2",s:"g"},{id:"A3",s:"g"},{id:"A4",s:"r"},{id:"A5",s:"g"},{id:"A6",s:"r"},{id:"A7",s:"b"},{id:"A8",s:"g"},{id:"A9",s:"r"},{id:"A10",s:"g"},{id:"A11",s:"g"},{id:"A12",s:"r"},{id:"A13",s:"g"},{id:"A14",s:"r"},{id:"A15",s:"g"},{id:"A16",s:"g"},{id:"A17",s:"g"},{id:"A18",s:"r"}];
+var zB=[{id:"B1",s:"g"},{id:"B2",s:"r"},{id:"B3",s:"g"},{id:"B4",s:"g"},{id:"B5",s:"r"},{id:"B6",s:"g"},{id:"B7",s:"b"},{id:"B8",s:"g"},{id:"B9",s:"g"},{id:"B10",s:"r"},{id:"B11",s:"g"},{id:"B12",s:"g"}];
+var sel=null;
+
+function rG(spots,cid){
+  var el=document.getElementById(cid);el.innerHTML="";
+  spots.forEach(function(sp){
+    var d=document.createElement("div");d.className="GS";
+    d.style.background=CL[sp.s];d.textContent=sp.id;d.dataset.id=sp.id;d.dataset.o=sp.s;
+    if(sp.s==="r"){d.style.cursor="default";d.style.opacity="0.75"}
+    else{d.onclick=function(){pick(this.dataset.id)}}
+    el.appendChild(d);
+  });
+}
+
+function pick(id){
+  if(sel){var p=document.querySelector('.GS[data-id="'+sel+'"]');if(p)p.style.background=CL[p.dataset.o]}
+  sel=id;var e=document.querySelector('.GS[data-id="'+id+'"]');if(e)e.style.background=CL.y;
+  document.getElementById("sel-label").textContent=id;document.getElementById("sel-label").style.color="#EF9F27";
+  document.getElementById("s-title").textContent="Spot "+id;document.getElementById("side").style.display="block";
+}
+
+function go(p){
+  document.querySelectorAll(".PG").forEach(function(e){e.classList.remove("on")});
+  var pg=document.getElementById("pg-"+p);if(pg)pg.classList.add("on");
+  var nb=document.getElementById("nav-bar");
+  if(p==="login"){nb.style.display="none"}else{nb.style.display="flex"}
+  document.querySelectorAll(".NB").forEach(function(l){l.classList.remove("NA")});
+  var mp=p;if(p==="payment"||p==="confirm")mp="bookings";
+  var lnk=document.querySelector('.NB[data-p="'+mp+'"]');if(lnk)lnk.classList.add("NA");
+  if(p==="payment")buildSteps("step-bar-pay",[{t:"Spot",done:true},{t:"Payment",cur:true},{t:"Confirmed",done:false}]);
+  if(p==="confirm")buildSteps("step-bar-conf",[{t:"Spot",done:true},{t:"Payment",done:true},{t:"Confirmed",done:true}]);
+}
+
+function buildSteps(id,steps){
+  var c=document.getElementById(id);c.innerHTML="";
+  steps.forEach(function(s,i){
+    var w=document.createElement("div");w.style.cssText="display:flex;flex-direction:column;align-items:center;gap:3px";
+    var ci=document.createElement("div");ci.style.cssText="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;";
+    if(s.done){ci.style.background="#1D9E75";ci.style.color="white";ci.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>'}
+    else if(s.cur){ci.style.background="#378ADD";ci.style.color="white";ci.textContent=i+1}
+    else{ci.style.background="var(--color-background-secondary)";ci.style.border="0.5px solid var(--color-border-tertiary)";ci.style.color="var(--color-text-tertiary)";ci.textContent=i+1}
+    var lb=document.createElement("span");lb.style.cssText="font-size:10px;"+(s.done?"color:#0F6E56;":s.cur?"color:#0C447C;":"color:var(--color-text-tertiary);")+"font-weight:500";lb.textContent=s.t;
+    w.appendChild(ci);w.appendChild(lb);c.appendChild(w);
+    if(i<steps.length-1){var ln=document.createElement("div");ln.style.cssText="flex:1;height:2px;margin:0 6px;margin-bottom:16px;background:"+(s.done?"#1D9E75":"var(--color-border-tertiary)");c.appendChild(ln)}
+  });
+}
+
+var days=["SUN","MON","TUE","WED","THU","FRI","SAT"];
+var months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function buildDates(){
+  var r=document.getElementById("date-row");r.innerHTML="";
+  var now=new Date(2026,3,29);
+  for(var i=0;i<5;i++){
+    var d=new Date(now);d.setDate(now.getDate()+i);
+    var btn=document.createElement("div");
+    btn.style.cssText="padding:6px 12px;border-radius:var(--border-radius-md);font-size:12px;cursor:pointer;text-align:center;min-width:52px;";
+    if(i===0){btn.style.background="#378ADD";btn.style.color="white";btn.classList.add("date-sel")}
+    else{btn.style.background="var(--color-background-primary)";btn.style.border="0.5px solid var(--color-border-tertiary)";btn.style.color="var(--color-text-primary)"}
+    btn.innerHTML='<div style="font-size:10px;'+(i===0?"opacity:0.8":"color:var(--color-text-tertiary)")+'">'+days[d.getDay()]+'</div>'+d.getDate()+" "+months[d.getMonth()];
+    btn.onclick=(function(el){return function(){
+      r.querySelectorAll("div").forEach(function(x){x.style.background="var(--color-background-primary)";x.style.color="var(--color-text-primary)";x.style.border="0.5px solid var(--color-border-tertiary)"});
+      el.style.background="#378ADD";el.style.color="white";el.style.border="none";
+    }})(btn);
+    r.appendChild(btn);
+  }
+}
+
+var TM={"8:00 AM":8,"9:00 AM":9,"10:00 AM":10,"11:00 AM":11,"12:00 PM":12,"1:00 PM":13,"2:00 PM":14,"3:00 PM":15,"4:00 PM":16};
+var TE={"12:00 PM":12,"1:00 PM":13,"2:00 PM":14,"3:00 PM":15,"4:00 PM":16,"5:00 PM":17,"6:00 PM":18,"7:00 PM":19,"8:00 PM":20};
+function calcDur(){var s=TM[document.getElementById("sel-start").value]||9;var e=TE[document.getElementById("sel-end").value]||17;var h=Math.max(1,e-s);document.getElementById("dur-val").textContent=h+" hour"+(h>1?"s":"");var r=h*20;var g=Math.round(r*0.18);document.getElementById("est-cost").textContent="₹"+Math.round(r+g)}
+
+function findSpots(){
+  zA.forEach(function(sp){sp.s=Math.random()>0.35?"g":Math.random()>0.5?"r":"b"});
+  zB.forEach(function(sp){sp.s=Math.random()>0.35?"g":Math.random()>0.5?"r":"b"});
+  sel=null;document.getElementById("side").style.display="none";
+  document.getElementById("sel-label").textContent="None";document.getElementById("sel-label").style.color="var(--color-text-tertiary)";
+  var ac=zA.filter(function(s){return s.s!=="r"}).length+zB.filter(function(s){return s.s!=="r"}).length;
+  document.getElementById("avail-count").innerHTML=ac+' <span style="font-size:12px;font-weight:400;color:var(--color-text-secondary)">of 30</span>';
+  rG(zA,"gA");rG(zB,"gB");
+}
+
+function showReg(){document.getElementById("login-form").style.display="none";document.getElementById("reg-form").style.display="block"}
+function showLogin(){document.getElementById("reg-form").style.display="none";document.getElementById("login-form").style.display="block"}
+
+document.querySelectorAll(".NB[data-p]").forEach(function(l){l.addEventListener("click",function(){go(this.dataset.p)})});
+
+buildDates();rG(zA,"gA");rG(zB,"gB");
+
+var cd=7*3600+12*60;
+setInterval(function(){
+  cd--;if(cd<0)cd=0;
+  var h=Math.floor(cd/3600);var m=Math.floor((cd%3600)/60);
+  var el=document.getElementById("countdown");if(el)el.textContent=h+"h "+m+"m remaining";
+},1000);
+</script>
