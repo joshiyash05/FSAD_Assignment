@@ -1,5 +1,5 @@
 import api from './api'
-import type { Reservation, UserStats } from '@/types'
+import type { Reservation, UserStats } from '@/types/index'
 
 export const reservationService = {
   async getAll(): Promise<Reservation[]> {
@@ -13,10 +13,10 @@ export const reservationService = {
   },
 
   async create(payload: {
-    spot_id: number
+    spot_id: number | string
     vehicle_id: number
-    start_time: string
-    end_time: string
+    start_time: string | null
+    end_time: string | null
   }): Promise<Reservation> {
     const { data } = await api.post('/reservations/', payload)
     return data

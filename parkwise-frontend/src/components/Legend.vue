@@ -1,15 +1,15 @@
 <template>
-  <div class="legend" style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-    <div style="display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;background:#1D9E75;border-radius:3px;display:inline-block"></span><span style="font-size:12px">Available</span></div>
-    <div style="display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;background:#378ADD;border-radius:3px;display:inline-block"></span><span style="font-size:12px">Opening soon</span></div>
-    <div style="display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;background:#E24B4A;border-radius:3px;display:inline-block"></span><span style="font-size:12px">Occupied</span></div>
+  <div class="legend p-d-flex p-ai-center p-gap-3 p-mb-2">
+    <Tag value="Available" severity="success" class="p-mr-2" />
+    <Tag value="Opening soon" severity="info" class="p-mr-2" />
+    <Tag value="Occupied" severity="danger" />
   </div>
 </template>
 
 <script setup lang="ts">
-// purely presentational
+import Tag from 'primevue/tag'
 </script>
 
 <style scoped>
-.legend { }
+.legend{ }
 </style>

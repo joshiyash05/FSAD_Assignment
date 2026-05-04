@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Spot, Vehicle } from '@/types'
+import type { Spot, Vehicle } from '@/types/index'
 
 export const useBookingStore = defineStore('booking', () => {
   const selectedDate = ref<string>('')

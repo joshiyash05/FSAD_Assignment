@@ -1,5 +1,5 @@
 import api from './api'
-import type { Amenity } from '@/types'
+import type { Amenity } from '@/types/index'
 
 export const amenityService = {
   async getAll(): Promise<Amenity[]> {

@@ -1,5 +1,5 @@
 import api from './api'
-import type { AvailabilityResponse } from '@/types'
+import type { AvailabilityResponse } from '@/types/index'
 
 export const spotService = {
   async getAll(): Promise<any> {

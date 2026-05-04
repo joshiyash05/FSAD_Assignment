@@ -1,5 +1,5 @@
 import api from './api'
-import type { CreateOrderResponse } from '@/types'
+import type { CreateOrderResponse } from '@/types/index'
 
 export const paymentService = {
   async createOrder(reservationId: number): Promise<CreateOrderResponse> {

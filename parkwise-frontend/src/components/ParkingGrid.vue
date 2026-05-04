@@ -1,10 +1,10 @@
 <template>
-  <div class="parking-grid">
-    <div class="zone" v-for="zone of zones" :key="zone">
-      <h4>Zone {{ zone }}</h4>
-      <div class="grid">
-        <div v-for="spot in spotsFor(zone)" :key="spot.id" :class="['spot', spotClass(spot)]" @click="onClick(spot)">
-          {{ spot.label }}
+  <div class="parking-grid p-grid p-nogutter">
+    <div v-for="zone of zones" :key="zone" class="p-col-12 p-mb-3">
+      <h4 class="p-mb-2">Zone {{ zone }}</h4>
+      <div class="grid p-grid p-nogutter">
+        <div v-for="spot in spotsFor(zone)" :key="spot.id" class="p-col-2 p-px-1 p-py-1">
+          <Button :class="['spot', spotClass(spot)]" :label="spot.label" @click="onClick(spot)" :disabled="spot.status==='occupied'" />
         </div>
       </div>
     </div>
@@ -13,14 +13,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Spot } from '@/types'
+import Button from 'primevue/button'
+import type { Spot } from '@/types/index'
 
 const props = defineProps<{ spots: Spot[] }>()
-const emit = defineEmits<[ (e: 'selectSpot', spot: Spot) => void ]>()
+const emit = defineEmits<{ (e: 'selectSpot', spot: Spot): void }>()
 
 const zones = computed(() => {
-  const s = props.spots.map(p => p.zone)
-  return Array.from(new Set(s)).sort()
+  const s = props.spots.map(p => p.zone || '')
+  return Array.from(new Set(s)).filter(Boolean).sort() as string[]
 })
 
 function spotsFor(zone: string) {
@@ -28,9 +29,9 @@ function spotsFor(zone: string) {
 }
 
 function spotClass(spot: Spot) {
-  if (spot.status === 'occupied') return 'occupied'
-  if (spot.status === 'opening_soon') return 'opening'
-  return 'available'
+  if (spot.status === 'occupied') return 'p-button-danger'
+  if (spot.status === 'opening_soon') return 'p-button-warning'
+  return 'p-button-success'
 }
 
 function onClick(spot: Spot) {
@@ -40,9 +41,5 @@ function onClick(spot: Spot) {
 </script>
 
 <style scoped>
-.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
-.spot{padding:10px;border-radius:6px;text-align:center}
-.spot.available{background:#e6fbf3;border:1px solid #1D9E75;cursor:pointer}
-.spot.opening{background:#fff4e6;border:1px solid #EF9F27;cursor:pointer}
-.spot.occupied{background:#fdecec;border:1px solid #E24B4A;color:#a33}
+.spot{width:100%;border-radius:6px}
 </style>

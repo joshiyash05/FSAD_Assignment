@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authService } from '@/services/authService'
-import type { User } from '@/types'
+import type { User } from '@/types/index'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
-  const token = ref<string | null>(localStorage.getItem('token'))
+  const token = ref<string | null>(localStorage.getItem('token') ?? null)
 
   const isAuthenticated = computed(() => !!token.value)
   const isAdmin = computed(() => user.value?.is_staff ?? false)
@@ -16,9 +16,9 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function login(username: string, password: string) {
     const res = await authService.login(username, password)
-    token.value = res.token
+    token.value = res.token ?? null
     user.value = res.user
-    localStorage.setItem('token', res.token)
+    if (res.token) localStorage.setItem('token', res.token)
   }
 
   async function register(payload: {
@@ -26,9 +26,9 @@ export const useAuthStore = defineStore('auth', () => {
     first_name: string; last_name: string
   }) {
     const res = await authService.register(payload)
-    token.value = res.token
+    token.value = res.token ?? null
     user.value = res.user
-    localStorage.setItem('token', res.token)
+    if (res.token) localStorage.setItem('token', res.token)
   }
 
   function logout() {

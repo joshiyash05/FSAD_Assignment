@@ -1,12 +1,15 @@
 <template>
-  <div class="bg-white rounded-lg p-2 inline-block border">
-    <img v-if="dataUrl" :src="dataUrl" :alt="value" :width="size" :height="size" />
-  </div>
+  <Card class="p-d-inline-block p-p-2">
+    <div class="p-d-flex p-jc-center p-ai-center">
+      <img v-if="dataUrl" :src="dataUrl" :alt="value" :width="size" :height="size" />
+    </div>
+  </Card>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
 import QRCode from 'qrcode'
+import Card from 'primevue/card'
 
 const props = defineProps<{ value: string; size?: number }>()
 const dataUrl = ref<string>('')
@@ -21,8 +24,6 @@ async function generate() {
     dataUrl.value = await QRCode.toDataURL(props.value, { width: size, margin: 1 })
   } catch (err) {
     dataUrl.value = ''
-    // keep console error for debugging
-    // eslint-disable-next-line no-console
     console.error('QR generation failed', err)
   }
 }

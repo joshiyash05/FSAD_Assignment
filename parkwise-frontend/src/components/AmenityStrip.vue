@@ -1,18 +1,25 @@
 <template>
-  <div class="amenity-strip">
+  <Card class="amenity-strip p-mt-3">
     <h4>Nearby amenities</h4>
-    <div class="list">
-      <div class="amen" v-for="a in amenities" :key="a.id">
-        <div class="name">{{ a.name }}</div>
-        <div class="meta">{{ a.distance }} • {{ a.operating_hours || '' }}</div>
+    <div class="p-grid p-nogutter p-align-start p-justify-start">
+      <div v-for="a in amenities" :key="a.id" class="p-col-12 p-md-4 p-lg-3 p-p-2">
+        <div class="p-p-3 p-shadow-1 amen">
+          <div class="p-d-flex p-jc-between p-ai-center">
+            <div class="name">{{ a.name }}</div>
+            <Tag :value="a.category" severity="info" />
+          </div>
+          <div class="meta p-mt-2">{{ a.distance }} <span v-if="a.operating_hours">• {{ a.operating_hours }}</span></div>
+        </div>
       </div>
     </div>
-  </div>
+  </Card>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { amenityService } from '@/services/amenityService'
+import Card from 'primevue/card'
+import Tag from 'primevue/tag'
 
 const amenities = ref<any[]>([])
 onMounted(async () => {
@@ -21,9 +28,8 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.amenity-strip{margin-top:16px}
-.list{display:flex;gap:8px;flex-wrap:wrap}
-.amen{background:#fff;padding:8px;border-radius:6px;border:1px solid #eef2f6;width:200px}
+.amenity-strip{width:100%}
+.amen{background:#fff;border-radius:8px}
 .name{font-weight:600}
-.meta{font-size:12px;color:#666}
+.meta{font-size:13px;color:#555}
 </style>

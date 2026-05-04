@@ -1,5 +1,5 @@
 import api from './api'
-import type { Vehicle } from '@/types'
+import type { Vehicle } from '@/types/index'
 
 export const vehicleService = {
   async getAll(): Promise<Vehicle[]> {
@@ -17,7 +17,7 @@ export const vehicleService = {
   },
 
   async setDefault(id: number): Promise<Vehicle> {
-    const { data } = await api.post(`/vehicles/${id}/set-default/`)
+    const { data } = await api.post(`/vehicles/${id}/set_default/`)
     return data
   }
 }
