@@ -1,41 +1,73 @@
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
 import { authService } from '@/services/authService'
-import type { User } from '@/types/index'
+import type { RegisterRequest, User } from '@/types/index'
+
+const storedUser = localStorage.getItem('user')
+
+function parseStoredUser() {
+  if (!storedUser) return null
+
+  try {
+    const parsedUser = JSON.parse(storedUser) as User
+    return typeof parsedUser.is_staff === 'boolean' ? parsedUser : null
+  } catch {
+    return null
+  }
+}
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<User | null>(null)
-  const token = ref<string | null>(localStorage.getItem('token') ?? null)
+  const user = ref<User | null>(parseStoredUser())
+  const token = ref<string | null>(localStorage.getItem('token'))
 
-  const isAuthenticated = computed(() => !!token.value)
+  const isAuthenticated = computed(() => Boolean(token.value))
   const isAdmin = computed(() => user.value?.is_staff ?? false)
   const initials = computed(() => {
-    if (!user.value) return ''
-    return (user.value.first_name[0] + user.value.last_name[0]).toUpperCase()
+    const currentUser = user.value
+    if (!currentUser) return 'P'
+
+    const nameParts = [currentUser.first_name, currentUser.last_name]
+      .map((part) => part?.trim())
+      .filter((part): part is string => Boolean(part))
+
+    if (nameParts.length >= 2) {
+      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase()
+    }
+
+    if (nameParts.length === 1) {
+      const [name] = nameParts
+      return name.slice(0, 2).toUpperCase()
+    }
+
+    return (currentUser.username?.[0] ?? currentUser.email?.[0] ?? 'P').toUpperCase()
   })
 
+  function persistSession(nextToken: string, nextUser: User) {
+    token.value = nextToken
+    user.value = nextUser
+    localStorage.setItem('token', nextToken)
+    localStorage.setItem('user', JSON.stringify(nextUser))
+  }
+
   async function login(username: string, password: string) {
-    const res = await authService.login(username, password)
-    token.value = res.token ?? null
-    user.value = res.user
-    if (res.token) localStorage.setItem('token', res.token)
+    const response = await authService.login(username, password)
+    persistSession(response.token, response.user)
   }
 
-  async function register(payload: {
-    username: string; email: string; password: string;
-    first_name: string; last_name: string
-  }) {
-    const res = await authService.register(payload)
-    token.value = res.token ?? null
-    user.value = res.user
-    if (res.token) localStorage.setItem('token', res.token)
+  async function register(payload: RegisterRequest) {
+    const response = await authService.register(payload)
+    persistSession(response.token, response.user)
   }
 
-  function logout() {
-    authService.logout().catch(() => {})
-    token.value = null
-    user.value = null
-    localStorage.removeItem('token')
+  async function logout() {
+    try {
+      if (token.value) await authService.logout()
+    } finally {
+      token.value = null
+      user.value = null
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+    }
   }
 
   return { user, token, isAuthenticated, isAdmin, initials, login, register, logout }

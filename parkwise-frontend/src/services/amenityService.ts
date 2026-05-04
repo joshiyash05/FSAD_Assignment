@@ -1,9 +1,13 @@
-import api from './api'
+import api, { getApiErrorMessage } from './api'
 import type { Amenity } from '@/types/index'
 
 export const amenityService = {
   async getAll(): Promise<Amenity[]> {
-    const { data } = await api.get('/amenities/')
-    return data
-  }
+    try {
+      const response = await api.get<Amenity[]>('amenities/')
+      return response.data
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Failed to load nearby amenities'))
+    }
+  },
 }

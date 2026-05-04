@@ -1,23 +1,39 @@
-import api from './api'
-import type { Vehicle } from '@/types/index'
+import api, { getApiErrorMessage } from './api'
+import type { CreateVehicleRequest, Vehicle } from '@/types/index'
 
 export const vehicleService = {
   async getAll(): Promise<Vehicle[]> {
-    const { data } = await api.get('/vehicles/')
-    return data
+    try {
+      const response = await api.get<Vehicle[]>('vehicles/')
+      return response.data
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Failed to load vehicles'))
+    }
   },
 
-  async add(payload: Omit<Vehicle, 'id' | 'is_default'>): Promise<Vehicle> {
-    const { data } = await api.post('/vehicles/', payload)
-    return data
+  async add(payload: CreateVehicleRequest): Promise<Vehicle> {
+    try {
+      const response = await api.post<Vehicle>('vehicles/', payload)
+      return response.data
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Failed to add vehicle'))
+    }
   },
 
   async delete(id: number): Promise<void> {
-    await api.delete(`/vehicles/${id}/`)
+    try {
+      await api.delete(`vehicles/${id}/`)
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Failed to delete vehicle'))
+    }
   },
 
   async setDefault(id: number): Promise<Vehicle> {
-    const { data } = await api.post(`/vehicles/${id}/set_default/`)
-    return data
-  }
+    try {
+      const response = await api.post<Vehicle>(`vehicles/${id}/set_default/`)
+      return response.data
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Failed to update default vehicle'))
+    }
+  },
 }

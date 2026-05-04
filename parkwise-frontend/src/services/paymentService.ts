@@ -1,20 +1,24 @@
-import api from './api'
-import type { CreateOrderResponse } from '@/types/index'
+import api, { getApiErrorMessage } from './api'
+import type { CreateOrderResponse, VerifyPaymentRequest } from '@/types/index'
 
 export const paymentService = {
   async createOrder(reservationId: number): Promise<CreateOrderResponse> {
-    const { data } = await api.post('/payments/create-order/', {
-      reservation_id: reservationId
-    })
-    return data
+    try {
+      const response = await api.post<CreateOrderResponse>('payments/create-order/', {
+        reservation_id: reservationId,
+      })
+      return response.data
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Failed to create payment order'))
+    }
   },
 
-  async verifyPayment(payload: {
-    razorpay_order_id: string
-    razorpay_payment_id: string
-    razorpay_signature: string
-  }): Promise<{ status: string }> {
-    const { data } = await api.post('/payments/verify/', payload)
-    return data
-  }
+  async verifyPayment(payload: VerifyPaymentRequest): Promise<{ status: string }> {
+    try {
+      const response = await api.post<{ status: string }>('payments/verify/', payload)
+      return response.data
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Payment verification failed'))
+    }
+  },
 }
