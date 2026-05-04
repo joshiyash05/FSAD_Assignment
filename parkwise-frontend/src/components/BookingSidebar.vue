@@ -33,6 +33,7 @@ import { ref, onMounted, computed } from 'vue'
 import { vehicleService } from '@/services/vehicleService'
 import { reservationService } from '@/services/reservationService'
 import { useRouter } from 'vue-router'
+import { useToast } from 'primevue/usetoast'
 import Card from 'primevue/card'
 import Dropdown from 'primevue/dropdown'
 import Button from 'primevue/button'
@@ -46,6 +47,7 @@ const vehicles = ref<any[]>([])
 const vehicleId = ref<number | null>(null)
 const booking = ref(false)
 const router = useRouter()
+const toast = useToast()
 
 const date = computed(() => props.date || '')
 const startISO = computed(() => props.startTime || '')
@@ -90,17 +92,24 @@ onMounted(async () => {
 })
 
 async function createReservation() {
-  if (!vehicleId.value) return alert('Select a vehicle')
+  if (!vehicleId.value) {
+    toast.add({ severity: 'warn', summary: 'Vehicle required', detail: 'Select a vehicle before booking.', life: 3000 })
+    return
+  }
   booking.value = true
   try {
   // backend expects ISO datetimes; props.startTime/endTime may already be ISO
-  const payload = { spot_id: props.spot.id, vehicle_id: vehicleId.value, start_time: startISO.value || props.startTime, end_time: endISO.value || props.endTime }
+  if (!startISO.value || !endISO.value) {
+    toast.add({ severity: 'warn', summary: 'Time required', detail: 'Select a date and time before booking.', life: 3000 })
+    return
+  }
+  const payload = { spot_id: props.spot.id, vehicle_id: vehicleId.value, start_time: startISO.value, end_time: endISO.value }
     const res = await reservationService.create(payload)
     emit('booked', res)
     try { router.push({ name: 'payment', params: { reservationId: res.id } }) } catch(e){}
   } catch (err) {
     console.error(err)
-    alert('Failed to create reservation')
+    toast.add({ severity: 'error', summary: 'Booking failed', detail: 'Failed to create reservation.', life: 4000 })
   } finally { booking.value = false }
 }
 </script>

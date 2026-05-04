@@ -1,179 +1,289 @@
-<template>
-  <div class="py-6">
-    <h1 class="text-2xl font-semibold mb-4">Dashboard</h1>
-    <div class="A" style="padding:14px">
-      <div style="background:#E6F1FB;border-radius:var(--border-radius-lg);padding:12px;margin-bottom:12px">
-        <p style="font-size:13px;font-weight:500;color:#0C447C;margin:0 0 8px">When do you want to park?</p>
-        <div>
-          <DateTimePicker @search="onDateSearch" />
-        </div>
-      </div>
-
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <div class="S" style="flex:1"><p class="SL">Available</p><p class="SV" style="color:#0F6E56" id="avail-count">{{ availCount }} <span style="font-size:12px;font-weight:400;color:var(--color-text-secondary)">of {{ totalSpots }}</span></p></div>
-        <div class="S" style="flex:1"><p class="SL">Free in next 3h</p><p class="SV" style="color:#0C447C">{{ freeSoon }}</p></div>
-        <div class="S" style="flex:1"><p class="SL">Est. cost</p><p class="SV" style="color:var(--color-text-primary)" id="est-cost">{{ estCost }}</p></div>
-        <div class="S" style="flex:1"><p class="SL">Your selection</p><p class="SV" id="sel-label" style="color:var(--color-text-tertiary)">{{ selectedSpotObj?.label || selectedSpotObj?.plate_number || 'None' }}</p></div>
-      </div>
-
-        <div style="display:flex;gap:10px">
-          <div style="flex:1">
-          <p style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin:0 0 5px">Zone A — Near gate 1</p>
-          <Legend />
-          <div id="gA">
-            <div v-for="spot in zA" :key="spot.id" class="GS" :data-status="spot.s"
-                 @click="pick(spot)"
-                 :style="{ background: colorForStatus(spot.s) }">
-              {{ spot.id }}
-            </div>
-          </div>
-          <p style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin:0 0 5px">Zone B — Near elevator</p>
-          <div id="gB">
-            <div v-for="spot in zB" :key="spot.id" class="GS" :data-status="spot.s"
-                 @click="pick(spot)"
-                 :style="{ background: colorForStatus(spot.s) }">
-              {{ spot.id }}
-            </div>
-          </div>
-        </div>
-
-        <div id="side" style="width:320px;">
-          <BookingSidebar v-if="selectedSpotObj" :spot="selectedSpotObj" :date="dateStr" :start-time="selectedStartISO" :end-time="selectedEndISO" @booked="onBooked" />
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useToast } from 'primevue/usetoast'
+import Button from 'primevue/button'
+import Calendar from 'primevue/calendar'
+import Card from 'primevue/card'
+import Dropdown from 'primevue/dropdown'
+import Message from 'primevue/message'
+import Sidebar from 'primevue/sidebar'
+import Skeleton from 'primevue/skeleton'
+import Tag from 'primevue/tag'
+import BookingSidebarContent from '@/components/BookingSidebarContent.vue'
+import { amenityService } from '@/services/amenityService'
 import { spotService } from '@/services/spotService'
-import BookingSidebar from '@/components/BookingSidebar.vue'
-import Legend from '@/components/Legend.vue'
-import DateTimePicker from '@/components/DateTimePicker.vue'
+import { useBookingStore } from '@/stores/booking'
+import type { Amenity, Spot } from '@/types/index'
 
-const today = new Date()
-function fmtDay(d: Date){ const days=["SUN","MON","TUE","WED","THU","FRI","SAT"];const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return { label: days[d.getDay()] , day: d.getDate(), key: d.toDateString(), pretty: d.getDate() + ' ' + months[d.getMonth()] } }
+const router = useRouter()
+const toast = useToast()
+const bookingStore = useBookingStore()
 
-const dates = Array.from({length:5}).map((_,i)=>{ const d=new Date(today); d.setDate(today.getDate()+i); return fmtDay(d) })
-const selectedDate = ref(0)
+const date = ref(new Date(`${bookingStore.selectedDate}T00:00:00`))
+const startTime = ref(bookingStore.startTime)
+const endTime = ref(bookingStore.endTime)
+const spots = ref<Spot[]>([])
+const summary = ref({ total: 0, available: 0, occupied: 0, opening_soon: 0 })
+const isSearching = ref(false)
+const hasSearched = ref(false)
+const sidebarVisible = ref(false)
+const refreshTimer = ref<number | null>(null)
+const amenities = ref<Amenity[]>([])
+const isLoadingAmenities = ref(false)
 
-// Manual start/end selects removed — DateTimePicker replaces them
-const estCost = computed(()=>{
-  if(!selectedStartISO.value || !selectedEndISO.value) return '—'
-  try{
-    const s = new Date(selectedStartISO.value)
-    const e = new Date(selectedEndISO.value)
-    const hours = Math.max(1, Math.round((e.getTime()-s.getTime())/3600000))
-    const r = hours * 20
-    const g = Math.round(r*0.18)
-    return '₹' + Math.round(r+g)
-  }catch(e){ return '—' }
+const timeOptions = Array.from({ length: 32 }, (_, index) => {
+  const minutes = 6 * 60 + index * 30
+  const hour = Math.floor(minutes / 60)
+  const minute = minutes % 60
+  const value = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`
+  return { label: value.slice(0, 5), value }
 })
 
-// spots returned from backend (keep raw backend object for booking)
-const zA = ref<Array<{id:string,s:string,raw:any}>>([])
-const zB = ref<Array<{id:string,s:string,raw:any}>>([])
+const spotsByZone = computed(() => {
+  return spots.value.reduce<Record<string, Spot[]>>((zones, spot) => {
+    zones[spot.zone] = zones[spot.zone] ?? []
+    zones[spot.zone].push(spot)
+    return zones
+  }, {})
+})
+const selectedSpot = computed(() => bookingStore.selectedSpot)
+const bestSpotId = computed(() => spots.value.find((spot) => spot.status === 'available')?.id)
+const emptyMessage = computed(() => hasSearched.value && !isSearching.value && spots.value.length === 0)
+const visibleAmenities = computed(() => amenities.value.slice(0, 4))
 
-const selectedSpotObj = ref<any | null>(null)
-const selectedStartISO = ref<string | null>(null)
-const selectedEndISO = ref<string | null>(null)
-const totalSpots = computed(()=> zA.value.length + zB.value.length)
-const availCount = computed(()=> zA.value.filter(s=>s.s!=='r').length + zB.value.filter(s=>s.s!=='r').length)
-const freeSoon = ref(0)
-
-function colorForStatus(s: string){ if(s==='g') return '#1D9E75'; if(s==='r') return '#E24B4A'; if(s==='b') return '#378ADD'; return '#EF9F27' }
-
-function pick(spot: {id:string,s:string,raw?:any}){
-  if(spot.s==='r') return
-  const raw = spot.raw || {}
-  const normalized = {
-    id: raw.id ?? spot.id,
-    label: raw.label ?? spot.id,
-    zone: raw.zone ?? (typeof spot.id === 'string' && spot.id.startsWith('B') ? 'B' : 'A'),
-    ...raw
-  }
-  console.log('pick -> selected spot', normalized)
-  selectedSpotObj.value = normalized
+function toDateString(input: Date) {
+  return input.toLocaleDateString('en-CA')
 }
 
-async function loadSpotsFromBackend(opts?: { dateISO?: string; startHour?: number; endHour?: number }){
-  try{
-    const spots = await spotService.getAll()
-    // spots expected to be array of { id, label, zone }
-    const mapped = spots.map((s: any)=>({ id: s.label || s.id, zone: s.zone || (s.label? s.label[0] : 'A'), raw: s }))
-    zA.value = mapped.filter((m:any)=>String(m.zone).startsWith('A')).map((m:any)=>({ id: m.id, s: 'g', raw: m.raw }))
-    zB.value = mapped.filter((m:any)=>String(m.zone).startsWith('B')).map((m:any)=>({ id: m.id, s: 'g', raw: m.raw }))
+function spotSeverity(status: Spot['status']) {
+  if (status === 'occupied') return 'danger'
+  if (status === 'opening_soon') return 'info'
+  return 'success'
+}
 
-    // Try availability endpoint to get statuses
-    try{
-    const dateStr = opts?.dateISO ?? new Date(dates[selectedDate.value].key).toISOString().split('T')[0]
-    // backend expects YYYY-MM-DD and HH:MM:SS (24h)
-    const fmtHourTime = (h:number) => String(h).padStart(2,'0') + ':00:00'
-    const sHour = opts?.startHour ?? 9
-    const eHour = opts?.endHour ?? 17
-    const startTs = fmtHourTime(sHour)
-    const endTs = fmtHourTime(eHour)
-    const res = await spotService.getAvailability(dateStr, startTs, endTs)
-      // handle few possible response shapes
-      if(res && typeof res === 'object'){
-        // expected: { availability: { A1: 'occupied' } } or map directly
-        const anyRes = res as any
-        const map: Record<string, any> = (anyRes.availability as Record<string, any>) || (anyRes as Record<string, any>) || {}
-        const getStatus = (id:string)=>{
-          const v = map[id] || map[id.replace(/^A|B/,'')]
-          if(!v) return 'g'
-          if(v==='occupied' || v==='r' || v===false) return 'r'
-          if(v==='soon' || v==='b') return 'b'
-          return 'g'
-        }
-        zA.value = zA.value.map(s=>({ id: s.id, s: getStatus(s.id), raw: s.raw }))
-        zB.value = zB.value.map(s=>({ id: s.id, s: getStatus(s.id), raw: s.raw }))
-      }
-    }catch(e){
-      // availability failed — fall back to random statuses
-      zA.value = zA.value.map((s)=>({ id: s.id, s: Math.random()>0.35? 'g' : Math.random()>0.5? 'r' : 'b', raw: s.raw }))
-      zB.value = zB.value.map((s)=>({ id: s.id, s: Math.random()>0.35? 'g' : Math.random()>0.5? 'r' : 'b', raw: s.raw }))
+function spotLabel(status: Spot['status']) {
+  if (status === 'occupied') return 'Occupied'
+  if (status === 'opening_soon') return 'Soon'
+  return 'Available'
+}
+
+function spotIcon(spot: Spot) {
+  if (spot.spot_type === 'ev') return 'pi pi-bolt'
+  if (spot.spot_type === 'covered') return 'pi pi-shield'
+  if (spot.spot_type === 'handicap') return 'pi pi-heart'
+  return 'pi pi-car'
+}
+
+function amenityIcon(category: Amenity['category']) {
+  const icons = {
+    petrol: 'pi pi-map',
+    ev: 'pi pi-bolt',
+    cafe: 'pi pi-coffee',
+    pharmacy: 'pi pi-heart',
+    atm: 'pi pi-credit-card',
+  }
+  return icons[category]
+}
+
+function amenityTone(category: Amenity['category']) {
+  return `amenity-${category}`
+}
+
+async function searchAvailability(showToast = true) {
+  if (!date.value || !startTime.value || !endTime.value) {
+    toast.add({ severity: 'warn', summary: 'Missing filters', detail: 'Select date, start time, and end time.', life: 3500 })
+    return
+  }
+  if (startTime.value >= endTime.value) {
+    toast.add({ severity: 'warn', summary: 'Invalid time', detail: 'End time must be after start time.', life: 3500 })
+    return
+  }
+
+  isSearching.value = true
+  hasSearched.value = true
+  bookingStore.resetSelection()
+
+  try {
+    const dateString = toDateString(date.value)
+    bookingStore.setFilters(dateString, startTime.value, endTime.value)
+    const response = await spotService.getAvailability(dateString, startTime.value, endTime.value)
+    spots.value = response.spots
+    summary.value = response.summary
+    if (showToast) {
+      toast.add({ severity: 'success', summary: 'Availability refreshed', detail: `${response.summary.available} spots available.`, life: 2500 })
     }
-  }catch(err){
-    console.error('Failed to load spots', err)
-    // fallback to sample grid
-    const sampleA = ["A1","A2","A3","A4","A5","A6","A7","A8","A9","A10","A11","A12","A13","A14","A15","A16","A17","A18"]
-    const sampleB = ["B1","B2","B3","B4","B5","B6","B7","B8","B9","B10","B11","B12"]
-    zA.value = sampleA.map((id)=>({ id, s: Math.random()>0.35? 'g' : Math.random()>0.5? 'r' : 'b', raw: { id: null, label: id, zone: 'A' } }))
-    zB.value = sampleB.map((id)=>({ id, s: Math.random()>0.35? 'g' : Math.random()>0.5? 'r' : 'b', raw: { id: null, label: id, zone: 'B' } }))
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Search failed',
+      detail: error instanceof Error ? error.message : 'Unable to search availability.',
+      life: 5000,
+    })
+  } finally {
+    isSearching.value = false
   }
 }
 
-
-function onDateSearch(payload: { date: string; start_time: string; end_time: string }){
-  // payload.start_time is HH:MM:SS
-  const dateISO = payload.date
-  const [sh] = payload.start_time.split(':').map(Number)
-  const [eh] = payload.end_time.split(':').map(Number)
-  selectedStartISO.value = `${dateISO}T${payload.start_time}`
-  selectedEndISO.value = `${dateISO}T${payload.end_time}`
-  // also set the textual selects for duration/estimate UI
-  // no local textual selects — update ISO refs only
-  // Update selectedDate to the matching index if present
-  const idx = dates.findIndex(d=> new Date(d.key).toISOString().split('T')[0] === dateISO)
-  if(idx >= 0) selectedDate.value = idx
-  // load spots for the chosen window
-  loadSpotsFromBackend({ dateISO, startHour: sh, endHour: eh })
+async function loadAmenities() {
+  isLoadingAmenities.value = true
+  try {
+    amenities.value = await amenityService.getAll()
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Amenities unavailable',
+      detail: error instanceof Error ? error.message : 'Unable to load nearby amenities.',
+      life: 4000,
+    })
+  } finally {
+    isLoadingAmenities.value = false
+  }
 }
 
-async function findSpots(){
-  await loadSpotsFromBackend()
-  selectedSpotObj.value = null
+function selectSpot(spot: Spot) {
+  if (spot.status === 'occupied') {
+    toast.add({ severity: 'info', summary: 'Spot occupied', detail: `${spot.label} is not available for this window.`, life: 2500 })
+    return
+  }
+  bookingStore.selectSpot(spot)
+  sidebarVisible.value = true
 }
 
-onMounted(()=>{ loadSpotsFromBackend() })
-
-const dateStr = computed(()=> new Date(dates[selectedDate.value].key).toISOString().split('T')[0])
-
-function onBooked(){
-  // clear selection and refresh availability
-  selectedSpotObj.value = null
-  findSpots()
+function handleBooked(reservationId: number) {
+  if (!Number.isFinite(reservationId)) {
+    toast.add({
+      severity: 'error',
+      summary: 'Reservation id missing',
+      detail: 'The reservation was created, but the payment page could not be opened.',
+      life: 5000,
+    })
+    return
+  }
+  sidebarVisible.value = false
+  router.push(`/payment/${reservationId}`)
 }
+
+onMounted(() => {
+  searchAvailability(false)
+  loadAmenities()
+  refreshTimer.value = window.setInterval(() => searchAvailability(false), 30000)
+})
+
+onUnmounted(() => {
+  if (refreshTimer.value) window.clearInterval(refreshTimer.value)
+})
 </script>
+
+<template>
+  <section class="page-stack">
+    <div class="page-title">
+      <div>
+        <h1>Find Parking</h1>
+        <p>Live availability, booking conflict checks, and instant payment handoff.</p>
+      </div>
+      <Button icon="pi pi-refresh" label="Refresh" outlined :loading="isSearching" @click="searchAvailability()" />
+    </div>
+
+    <Card>
+      <template #content>
+        <div class="search-grid">
+          <span class="p-float-label">
+            <Calendar id="date" v-model="date" class="w-full" date-format="yy-mm-dd" :min-date="new Date()" :disabled="isSearching" />
+            <label for="date">Date</label>
+          </span>
+          <span class="p-float-label">
+            <Dropdown id="start" v-model="startTime" :options="timeOptions" option-label="label" option-value="value" class="w-full" :disabled="isSearching" />
+            <label for="start">Start</label>
+          </span>
+          <span class="p-float-label">
+            <Dropdown id="end" v-model="endTime" :options="timeOptions" option-label="label" option-value="value" class="w-full" :disabled="isSearching" />
+            <label for="end">End</label>
+          </span>
+          <Button label="Search" icon="pi pi-search" :loading="isSearching" @click="searchAvailability()" />
+        </div>
+      </template>
+    </Card>
+
+    <div class="stat-grid">
+      <Card><template #content><span class="muted-label">Available</span><strong class="stat success">{{ summary.available }}</strong></template></Card>
+      <Card><template #content><span class="muted-label">Occupied</span><strong class="stat danger">{{ summary.occupied }}</strong></template></Card>
+      <Card><template #content><span class="muted-label">Opening soon</span><strong class="stat info">{{ summary.opening_soon }}</strong></template></Card>
+      <Card><template #content><span class="muted-label">Estimated total</span><strong class="stat">₹{{ bookingStore.totalAmount }}</strong></template></Card>
+    </div>
+
+    <Skeleton v-if="isSearching" height="22rem" />
+    <Message v-else-if="emptyMessage" severity="info" :closable="false">No spots found for this time window.</Message>
+
+    <div v-else class="zone-stack">
+      <Card v-for="(zoneSpots, zone) in spotsByZone" :key="zone">
+        <template #title>
+          <div class="zone-title">
+            <span>Zone {{ zone }}</span>
+            <Tag v-if="zoneSpots.some((spot) => spot.id === bestSpotId)" value="Best available here" severity="success" />
+          </div>
+        </template>
+        <template #content>
+          <div class="spot-grid">
+            <button
+              v-for="spot in zoneSpots"
+              :key="spot.id"
+              type="button"
+              class="spot-tile"
+              :class="[spot.status, { selected: selectedSpot?.id === spot.id, best: bestSpotId === spot.id }]"
+              :disabled="spot.status === 'occupied'"
+              @click="selectSpot(spot)"
+            >
+              <span class="spot-topline">
+                <i :class="spotIcon(spot)" />
+                <Tag v-if="bestSpotId === spot.id" value="Best" severity="success" />
+              </span>
+              <strong>{{ spot.label }}</strong>
+              <span>Zone {{ spot.zone }} · {{ spot.spot_type }}</span>
+              <Tag :value="spotLabel(spot.status)" :severity="spotSeverity(spot.status)" rounded />
+            </button>
+          </div>
+        </template>
+      </Card>
+    </div>
+
+    <Card>
+      <template #title>
+        <div class="zone-title">
+          <span>Nearby Amenities</span>
+          <Button label="View all" icon="pi pi-arrow-right" text @click="router.push('/nearby')" />
+        </div>
+      </template>
+      <template #content>
+        <div v-if="isLoadingAmenities" class="dashboard-amenities">
+          <Skeleton v-for="index in 4" :key="index" height="7rem" />
+        </div>
+        <Message v-else-if="visibleAmenities.length === 0" severity="info" :closable="false">
+          No amenities found near this parking area.
+        </Message>
+        <div v-else class="dashboard-amenities">
+          <article v-for="amenity in visibleAmenities" :key="amenity.id" class="dashboard-amenity">
+            <span class="dashboard-amenity-icon" :class="amenityTone(amenity.category)">
+              <i :class="amenityIcon(amenity.category)" />
+            </span>
+            <div>
+              <div class="amenity-head">
+                <strong>{{ amenity.name }}</strong>
+                <Tag :value="amenity.is_open ? 'Open' : 'Closed'" :severity="amenity.is_open ? 'success' : 'danger'" />
+              </div>
+              <p>{{ amenity.distance }}</p>
+              <span>{{ amenity.extra_info || amenity.operating_hours || 'Details unavailable' }}</span>
+            </div>
+          </article>
+        </div>
+      </template>
+    </Card>
+
+    <Sidebar v-model:visible="sidebarVisible" position="right" class="booking-sidebar">
+      <template #header>
+        <h2>Booking Summary</h2>
+      </template>
+      <BookingSidebarContent v-if="selectedSpot" :spot="selectedSpot" @booked="handleBooked" @close="sidebarVisible = false" />
+    </Sidebar>
+  </section>
+</template>
