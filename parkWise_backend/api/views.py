@@ -28,6 +28,14 @@ from .permissions import IsOwnerOrAdmin
 razorpay_client = razorpay.Client(auth=(os.getenv('RAZORPAY_KEY_ID'), os.getenv('RAZORPAY_KEY_SECRET')))
 
 
+def expire_completed_reservations():
+    """Mark active reservations whose checkout time has passed as completed."""
+    return Reservation.objects.filter(
+        status='active',
+        end_time__lte=timezone.now()
+    ).update(status='completed')
+
+
 # --- Authentication Views ---
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -82,6 +90,8 @@ class SpotAvailabilityView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
+        expire_completed_reservations()
+
         date_str = request.query_params.get('date')
         start_time_str = request.query_params.get('start_time')
         end_time_str = request.query_params.get('end_time')
@@ -181,6 +191,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
 
     def get_queryset(self):
+        expire_completed_reservations()
         return Reservation.objects.filter(user=self.request.user).order_by('-created_at')
 
     def get_serializer_class(self):
@@ -190,6 +201,13 @@ class ReservationViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        expire_completed_reservations()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        reservation = serializer.save(user=request.user)
+        return Response(ReservationSerializer(reservation).data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['patch'])
     def cancel(self, request, pk=None):
@@ -221,6 +239,7 @@ class ReservationStatsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
+        expire_completed_reservations()
         user_reservations = Reservation.objects.filter(user=request.user)
 
         total_bookings = user_reservations.count()
@@ -248,6 +267,8 @@ class CreateRazorpayOrderView(APIView):
 
     @extend_schema(request=CreateRazorpayOrderSerializer)
     def post(self, request, *args, **kwargs):
+        expire_completed_reservations()
+
         reservation_id = request.data.get('reservation_id')
         if not reservation_id:
             return Response({"error": "reservation_id is required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -256,6 +277,11 @@ class CreateRazorpayOrderView(APIView):
             reservation = Reservation.objects.get(id=reservation_id, user=request.user)
         except Reservation.DoesNotExist:
             return Response({"error": "Reservation not found or does not belong to user."}, status=status.HTTP_404_NOT_FOUND)
+
+        if reservation.end_time <= timezone.now():
+            reservation.status = 'completed'
+            reservation.save(update_fields=['status'])
+            return Response({"error": "This reservation has already expired."}, status=status.HTTP_400_BAD_REQUEST)
         
         if hasattr(reservation, 'payment') and reservation.payment.status == 'paid':
             return Response({"error": "Payment for this reservation is already completed."}, status=status.HTTP_400_BAD_REQUEST)
@@ -335,15 +361,19 @@ class AmenityListView(generics.ListAPIView):
 
 # --- Admin Views ---
 class AdminReservationListView(generics.ListAPIView):
-    queryset = Reservation.objects.all().order_by('-created_at')
     serializer_class = ReservationSerializer
     permission_classes = [IsAdminUser]
+
+    def get_queryset(self):
+        expire_completed_reservations()
+        return Reservation.objects.all().order_by('-created_at')
 
 
 class AdminStatsView(APIView):
     permission_classes = [IsAdminUser]
 
     def get(self, request, *args, **kwargs):
+        expire_completed_reservations()
         total_users = User.objects.count()
         active_bookings = Reservation.objects.filter(status='active').count()
 

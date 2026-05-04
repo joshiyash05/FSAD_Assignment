@@ -7,7 +7,8 @@ from .models import Spot, Vehicle, Reservation, Payment, Amenity
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_staff']
+        read_only_fields = ['is_staff']
 
 
 class RegisterSerializer(serializers.ModelSerializer):

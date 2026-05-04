@@ -8,6 +8,6 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         now = timezone.now()
         updated_count = Reservation.objects.filter(
-            end_time__lt=now, status="active"
+            end_time__lte=now, status="active"
         ).update(status="completed")
         self.stdout.write(self.style.SUCCESS(f"Successfully marked {updated_count} reservations as completed."))
