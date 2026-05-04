@@ -1,42 +1,49 @@
-<template>
-  <div class="p-d-flex p-jc-between p-ai-center p-px-3 p-py-2 nav">
-    <div class="p-d-flex p-ai-center">
-      <div class="logo p-mr-2">P</div>
-      <div class="title">ParkWise</div>
-    </div>
-
-    <div class="p-d-flex p-ai-center p-gap-3">
-      <Button v-for="link in navLinks" :key="link.to" :label="link.label" class="p-button-text" @click="() => go(link.to)" />
-
-      <Button v-if="authStore.isAdmin" label="Admin" class="p-button-text" @click="() => go('/admin')" />
-
-      <Avatar :label="authStore.initials" shape="circle" class="p-ml-2" @click="goProfile" />
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import Button from 'primevue/button'
 import Avatar from 'primevue/avatar'
+import Button from 'primevue/button'
+import Menubar from 'primevue/menubar'
+import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 const router = useRouter()
 
-const navLinks = [
-  { to: '/', name: 'dashboard', label: 'Dashboard' },
-  { to: '/bookings', name: 'bookings', label: 'My bookings' },
-  { to: '/nearby', name: 'nearby', label: 'Nearby' },
-  { to: '/profile', name: 'profile', label: 'Profile' },
-]
+const items = computed(() => [
+  { label: 'Dashboard', icon: 'pi pi-th-large', command: () => router.push('/') },
+  { label: 'Bookings', icon: 'pi pi-book', command: () => router.push('/bookings') },
+  { label: 'Nearby', icon: 'pi pi-map-marker', command: () => router.push('/nearby') },
+  { label: 'Profile', icon: 'pi pi-user', command: () => router.push('/profile') },
+  ...(authStore.isAdmin ? [{ label: 'Admin', icon: 'pi pi-shield', command: () => router.push('/admin') }] : []),
+])
 
-function goProfile() { router.push('/profile') }
-function go(path: string) { router.push(path) }
+async function logout() {
+  await authStore.logout()
+  router.push('/login')
+}
 </script>
 
-<style scoped>
-.nav{background:white;border-bottom:1px solid #eef2f6}
-.logo{width:36px;height:36px;background:#378ADD;color:white;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700}
-.title{font-weight:700}
-</style>
+<template>
+  <header class="topbar">
+    <Menubar :model="items">
+      <template #start>
+        <button class="brand-button" type="button" @click="router.push('/')">
+          <span class="brand-mark small"><i class="pi pi-car" /></span>
+          <span>ParkWise</span>
+        </button>
+      </template>
+      <template #item="{ item, props }">
+        <a v-bind="props.action" class="nav-menu-link">
+          <i :class="item.icon" />
+          <span>{{ item.label }}</span>
+        </a>
+      </template>
+      <template #end>
+        <div class="topbar-actions">
+          <Avatar :label="authStore.initials" shape="circle" class="profile-avatar" />
+          <Button icon="pi pi-sign-out" text rounded aria-label="Logout" @click="logout" />
+        </div>
+      </template>
+    </Menubar>
+  </header>
+</template>
