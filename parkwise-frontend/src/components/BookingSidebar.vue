@@ -24,8 +24,8 @@ import { useRouter } from 'vue-router'
 
 import type { Spot } from '@/types'
 
-const props = defineProps<{ spot: Spot; date: string; 'start-time': string; 'end-time': string }>()
-const emit = defineEmits<[ (e: 'booked', res: any) => void ]>()
+const props = defineProps<{ spot: Spot; date: string; startTime: string; endTime: string }>()
+const emit = defineEmits<{ (e: 'booked', res: any): void }>()
 
 const vehicles = ref<any[]>([])
 const vehicleId = ref<number | null>(null)
@@ -33,8 +33,8 @@ const booking = ref(false)
 const router = useRouter()
 
 const date = props.date || ''
-const startTime = props['start-time'] || ''
-const endTime = props['end-time'] || ''
+const startTime = props.startTime || ''
+const endTime = props.endTime || ''
 
 onMounted(async () => {
   try {
