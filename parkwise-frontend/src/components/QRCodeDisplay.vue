@@ -1,8 +1,9 @@
 <template>
-  <Card class="p-d-inline-block p-p-2">
-    <div class="p-d-flex p-jc-center p-ai-center">
+  <Card class="qr-card">
+    <template #content>
       <img v-if="dataUrl" :src="dataUrl" :alt="value" :width="size" :height="size" />
-    </div>
+      <span v-else class="muted-label">QR unavailable</span>
+    </template>
   </Card>
 </template>
 

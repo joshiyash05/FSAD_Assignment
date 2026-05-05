@@ -5,15 +5,20 @@ import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
+import Dialog from 'primevue/dialog'
+import Divider from 'primevue/divider'
 import Message from 'primevue/message'
 import Skeleton from 'primevue/skeleton'
 import Tag from 'primevue/tag'
+import QRCodeDisplay from '@/components/QRCodeDisplay.vue'
 import { reservationService } from '@/services/reservationService'
 import type { Reservation } from '@/types/index'
 
 const toast = useToast()
 const reservations = ref<Reservation[]>([])
 const isLoading = ref(true)
+const qrDialogVisible = ref(false)
+const selectedQrBooking = ref<Reservation | null>(null)
 
 function formatDate(value: string) {
   return new Date(value).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
@@ -30,6 +35,23 @@ function effectiveStatus(reservation: Reservation): Reservation['status'] {
     return 'completed'
   }
   return reservation.status
+}
+
+function qrPayload(reservation: Reservation) {
+  return JSON.stringify({
+    ref: `PKW-${reservation.id}`,
+    spot: reservation.spot.label,
+    zone: reservation.spot.zone,
+    vehicle: reservation.vehicle?.plate_number ?? null,
+    start: reservation.start_time,
+    end: reservation.end_time,
+    status: effectiveStatus(reservation),
+  })
+}
+
+function showQrCode(reservation: Reservation) {
+  selectedQrBooking.value = reservation
+  qrDialogVisible.value = true
 }
 
 async function loadBookings() {
@@ -116,6 +138,14 @@ onMounted(loadBookings)
           </Column>
           <Column header="Actions">
             <template #body="{ data }">
+              <div class="table-actions">
+                <Button
+                  label="QR"
+                  icon="pi pi-qrcode"
+                  text
+                  size="small"
+                  @click="showQrCode(data)"
+                />
               <Button
                 v-if="effectiveStatus(data) === 'active'"
                 label="Cancel"
@@ -124,10 +154,35 @@ onMounted(loadBookings)
                 size="small"
                 @click="cancelBooking(data)"
               />
+              </div>
             </template>
           </Column>
         </DataTable>
       </template>
     </Card>
+
+    <Dialog v-model:visible="qrDialogVisible" modal header="Booking QR Code" class="qr-dialog">
+      <div v-if="selectedQrBooking" class="qr-dialog-content">
+        <QRCodeDisplay :value="qrPayload(selectedQrBooking)" :size="220" />
+        <div class="center-title compact">
+          <h2>PKW-{{ selectedQrBooking.id }}</h2>
+          <p>{{ selectedQrBooking.spot.label }} · Zone {{ selectedQrBooking.spot.zone }}</p>
+        </div>
+        <Divider />
+        <div class="summary-list wide">
+          <span>Vehicle</span>
+          <strong>{{ selectedQrBooking.vehicle?.plate_number ?? '-' }}</strong>
+          <span>Start</span>
+          <strong>{{ formatDate(selectedQrBooking.start_time) }}</strong>
+          <span>End</span>
+          <strong>{{ formatDate(selectedQrBooking.end_time) }}</strong>
+          <span>Status</span>
+          <Tag :value="effectiveStatus(selectedQrBooking)" :severity="statusSeverity(effectiveStatus(selectedQrBooking))" />
+        </div>
+      </div>
+      <template #footer>
+        <Button label="Close" icon="pi pi-times" @click="qrDialogVisible = false" />
+      </template>
+    </Dialog>
   </section>
 </template>

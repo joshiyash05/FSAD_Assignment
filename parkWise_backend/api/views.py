@@ -192,6 +192,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         expire_completed_reservations()
+        if self.request.user.is_staff:
+            return Reservation.objects.all().order_by('-created_at')
         return Reservation.objects.filter(user=self.request.user).order_by('-created_at')
 
     def get_serializer_class(self):
@@ -213,7 +215,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
     def cancel(self, request, pk=None):
         reservation = self.get_object()
 
-        if reservation.user != request.user:
+        if reservation.user != request.user and not request.user.is_staff:
             return Response({"detail": "Not authorized to cancel this reservation."}, status=status.HTTP_403_FORBIDDEN)
 
         if reservation.status != 'active':

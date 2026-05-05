@@ -62,7 +62,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'PWbackend.urls'
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Vite dev server
+    "http://localhost:5173",
+    "http://localhost:3000",  # Vite dev server
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
